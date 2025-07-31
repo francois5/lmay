@@ -1,0 +1,202 @@
+lmay_version: "1.0"
+
+module:
+  type: "microservice"
+  role: "Product catalog management and inventory tracking"
+  parent: "root.lmay"
+
+hierarchy:
+  depth: 1
+  parent: "../../root.lmay"
+
+project:
+  name: "product-service"
+  description: "Microservice for product catalog, inventory, and search functionality"
+  technology_stack: ["fastapi", "postgresql", "sqlalchemy", "elasticsearch", "redis"]
+
+structure:
+  app:
+    path: "services/product-service/app"
+    type: "directory"
+    description: "FastAPI application code"
+    file_count: 15
+    primary_language: "python"
+
+  models:
+    path: "services/product-service/app/models"
+    type: "directory"
+    description: "SQLAlchemy database models"
+    file_count: 5
+    primary_language: "python"
+
+  routers:
+    path: "services/product-service/app/routers"
+    type: "directory"
+    description: "API route handlers"
+    file_count: 4
+    primary_language: "python"
+
+  services:
+    path: "services/product-service/app/services"
+    type: "directory"
+    description: "Business logic and external integrations"
+    file_count: 6
+    primary_language: "python"
+
+  tests:
+    path: "services/product-service/tests"
+    type: "directory"
+    description: "Unit and integration tests"
+    file_count: 10
+    primary_language: "python"
+
+dependencies:
+  external:
+    - name: "fastapi"
+      version: "0.104.1"
+      type: "pip"
+    - name: "sqlalchemy"
+      version: "2.0.23"
+      type: "pip"
+    - name: "psycopg2-binary"
+      version: "2.9.7"
+      type: "pip"
+    - name: "elasticsearch"
+      version: "8.10.0"
+      type: "pip"
+    - name: "redis"
+      version: "5.0.1"
+      type: "pip"
+    - name: "pydantic"
+      version: "2.5.0"
+      type: "pip"
+  internal:
+    - name: "shared-logger"
+      path: "../../shared/logger"
+    - name: "shared-metrics"
+      path: "../../shared/metrics"
+    - name: "shared-events"
+      path: "../../shared/events"
+
+interfaces:
+  - type: "REST"
+    description: "Product catalog API"
+    endpoint: "http://product-service:8000"
+  - type: "Database"
+    description: "PostgreSQL product database"
+    endpoint: "postgres://product-db:5432/products"
+  - type: "Database"
+    description: "Redis cache for product data"
+    endpoint: "redis://redis:6379/1"
+  - type: "Database"
+    description: "Elasticsearch for product search"
+    endpoint: "http://elasticsearch:9200/products"
+  - type: "MessageQueue"
+    description: "Product events publishing"
+    endpoint: "amqp://rabbitmq:5672/product-events"
+
+api_endpoints:
+  - path: "/products"
+    method: "GET"
+    description: "List products with pagination and filtering"
+    authentication: false
+  - path: "/products/{product_id}"
+    method: "GET"
+    description: "Get product details"
+    authentication: false
+  - path: "/products"
+    method: "POST"
+    description: "Create new product"
+    authentication: true
+  - path: "/products/{product_id}"
+    method: "PUT"
+    description: "Update product information"
+    authentication: true
+  - path: "/products/{product_id}"
+    method: "DELETE"
+    description: "Delete product"
+    authentication: true
+  - path: "/products/search"
+    method: "GET"
+    description: "Search products using Elasticsearch"
+    authentication: false
+  - path: "/products/{product_id}/inventory"
+    method: "GET"
+    description: "Get product inventory status"
+    authentication: false
+  - path: "/products/{product_id}/inventory"
+    method: "PUT"
+    description: "Update product inventory"
+    authentication: true
+
+events:
+  publishes:
+    - name: "product.created"
+      description: "Published when new product is added"
+      schema: "ProductCreatedEvent"
+    - name: "product.updated"
+      description: "Published when product information changes"
+      schema: "ProductUpdatedEvent"
+    - name: "product.deleted"
+      description: "Published when product is removed"
+      schema: "ProductDeletedEvent"
+    - name: "inventory.updated"
+      description: "Published when inventory levels change"
+      schema: "InventoryUpdatedEvent"
+  subscribes:
+    - name: "order.created"
+      description: "Updates inventory when order is placed"
+      schema: "OrderCreatedEvent"
+
+database_schema:
+  tables:
+    - name: "products"
+      description: "Product catalog information"
+      indexes: ["name", "category", "price", "created_at"]
+    - name: "categories"
+      description: "Product categories hierarchy"
+      indexes: ["name", "parent_id"]
+    - name: "inventory"
+      description: "Product stock levels"
+      indexes: ["product_id", "warehouse_id"]
+    - name: "product_images"
+      description: "Product image URLs and metadata"
+      indexes: ["product_id"]
+
+search_configuration:
+  engine: "elasticsearch"
+  indexes:
+    - name: "products"
+      fields: ["name", "description", "category", "tags"]
+      analyzers: ["standard", "keyword"]
+  features:
+    - "full_text_search"
+    - "faceted_search"
+    - "autocomplete"
+    - "fuzzy_matching"
+
+caching:
+  strategy: "redis"
+  ttl: 3600
+  cache_keys:
+    - "product:{id}"
+    - "products:category:{category}"
+    - "search:{query_hash}"
+
+health_checks:
+  - name: "database"
+    endpoint: "/health/db"
+    description: "PostgreSQL connection status"
+  - name: "elasticsearch"
+    endpoint: "/health/search"
+    description: "Elasticsearch cluster health"
+  - name: "redis"
+    endpoint: "/health/cache"
+    description: "Redis cache availability"
+
+metadata:
+  port: 8000
+  database: "postgresql"
+  search_engine: "elasticsearch"
+  cache: "redis"
+  message_queue: "rabbitmq"

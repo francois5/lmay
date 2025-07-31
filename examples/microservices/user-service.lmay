@@ -1,0 +1,154 @@
+lmay_version: "1.0"
+
+module:
+  type: "microservice"
+  role: "User management, authentication and profile services"
+  parent: "root.lmay"
+
+hierarchy:
+  depth: 1
+  parent: "../../root.lmay"
+
+project:
+  name: "user-service"
+  description: "Microservice handling user registration, authentication, and profile management"
+  technology_stack: ["express", "mongodb", "mongoose", "bcrypt", "jwt"]
+
+structure:
+  src:
+    path: "services/user-service/src"
+    type: "directory"
+    description: "Service source code"
+    file_count: 12
+    primary_language: "javascript"
+
+  controllers:
+    path: "services/user-service/src/controllers"
+    type: "directory"
+    description: "Request handlers and business logic"
+    file_count: 4
+    primary_language: "javascript"
+
+  models:
+    path: "services/user-service/src/models"
+    type: "directory"
+    description: "User data models and schemas"
+    file_count: 3
+    primary_language: "javascript"
+
+  services:
+    path: "services/user-service/src/services"
+    type: "directory"
+    description: "Business logic and external integrations"
+    file_count: 5
+    primary_language: "javascript"
+
+  tests:
+    path: "services/user-service/tests"
+    type: "directory"
+    description: "Unit and integration tests"
+    file_count: 8
+    primary_language: "javascript"
+
+dependencies:
+  external:
+    - name: "express"
+      version: "4.18.2"
+      type: "npm"
+    - name: "mongoose"
+      version: "7.5.0"
+      type: "npm"
+    - name: "bcryptjs"
+      version: "2.4.3"
+      type: "npm"
+    - name: "jsonwebtoken"
+      version: "9.0.2"
+      type: "npm"
+    - name: "validator"
+      version: "13.11.0"
+      type: "npm"
+  internal:
+    - name: "shared-auth"
+      path: "../../shared/auth"
+    - name: "shared-logger"
+      path: "../../shared/logger"
+    - name: "shared-metrics"
+      path: "../../shared/metrics"
+
+interfaces:
+  - type: "REST"
+    description: "User management API"
+    endpoint: "http://user-service:3001"
+  - type: "Database"
+    description: "MongoDB user database"
+    endpoint: "mongodb://user-db:27017/users"
+  - type: "MessageQueue"
+    description: "User events publishing"
+    endpoint: "amqp://rabbitmq:5672/user-events"
+
+api_endpoints:
+  - path: "/users"
+    method: "POST"
+    description: "Create new user account"
+    authentication: false
+  - path: "/users/:id"
+    method: "GET"
+    description: "Get user profile"
+    authentication: true
+  - path: "/users/:id"
+    method: "PUT"
+    description: "Update user profile"
+    authentication: true
+  - path: "/users/:id"
+    method: "DELETE"
+    description: "Delete user account"
+    authentication: true
+  - path: "/auth/login"
+    method: "POST"
+    description: "User authentication"
+    authentication: false
+  - path: "/auth/refresh"
+    method: "POST"
+    description: "Refresh access token"
+    authentication: true
+  - path: "/auth/logout"
+    method: "POST"
+    description: "User logout"
+    authentication: true
+
+events:
+  publishes:
+    - name: "user.created"
+      description: "Published when new user registers"
+      schema: "UserCreatedEvent"
+    - name: "user.updated"
+      description: "Published when user profile changes"
+      schema: "UserUpdatedEvent"
+    - name: "user.deleted"
+      description: "Published when user account is deleted"
+      schema: "UserDeletedEvent"
+  subscribes: []
+
+database_schema:
+  collections:
+    - name: "users"
+      description: "User account information"
+      indexes: ["email", "username", "createdAt"]
+    - name: "sessions"
+      description: "Active user sessions"
+      indexes: ["userId", "token", "expiresAt"]
+
+health_checks:
+  - name: "database"
+    endpoint: "/health/db"
+    description: "MongoDB connection status"
+  - name: "service"
+    endpoint: "/health"
+    description: "Overall service health"
+
+metadata:
+  port: 3001
+  database: "mongodb"
+  message_queue: "rabbitmq"
+  authentication: "jwt"
+  password_hashing: "bcrypt"

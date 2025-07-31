@@ -1,0 +1,98 @@
+lmay_version: "1.0"
+
+module:
+  type: "frontend"
+  role: "User interface and client-side logic"
+  parent: "root.lmay"
+
+hierarchy:
+  depth: 1
+  parent: "../root.lmay"
+
+project:
+  name: "ecommerce-frontend"
+  description: "React-based frontend for e-commerce platform"
+  technology_stack: ["react", "typescript", "tailwindcss", "redux"]
+
+structure:
+  public:
+    path: "client/public"
+    type: "directory"
+    description: "Static assets and HTML template"
+    file_count: 8
+
+  src:
+    path: "client/src"
+    type: "directory"
+    description: "React application source code"
+    file_count: 37
+    primary_language: "javascript"
+
+  components:
+    path: "client/src/components"
+    type: "directory"
+    description: "Reusable React components"
+    file_count: 18
+    primary_language: "javascript"
+
+  pages:
+    path: "client/src/pages"
+    type: "directory"
+    description: "Page-level components and routing"
+    file_count: 8
+    primary_language: "javascript"
+
+  hooks:
+    path: "client/src/hooks"
+    type: "directory"
+    description: "Custom React hooks"
+    file_count: 5
+    primary_language: "javascript"
+
+  services:
+    path: "client/src/services"
+    type: "directory"
+    description: "API client and external service integrations"
+    file_count: 6
+    primary_language: "javascript"
+
+dependencies:
+  external:
+    - name: "react"
+      version: "18.2.0"
+      type: "npm"
+    - name: "react-dom"
+      version: "18.2.0"
+      type: "npm"
+    - name: "react-router-dom"
+      version: "6.15.0"
+      type: "npm"
+    - name: "@reduxjs/toolkit"
+      version: "1.9.5"
+      type: "npm"
+    - name: "axios"
+      version: "1.5.0"
+      type: "npm"
+    - name: "tailwindcss"
+      version: "3.3.3"
+      type: "npm"
+
+interfaces:
+  - type: "REST"
+    description: "Backend API communication"
+    endpoint: "/api"
+  - type: "WebSocket"
+    description: "Real-time updates"
+    endpoint: "/ws"
+
+build_config:
+  entry_point: "src/index.js"
+  output_directory: "build"
+  development_server: "localhost:3000"
+  build_tool: "create-react-app"
+
+metadata:
+  component_count: 26
+  page_count: 8
+  hook_count: 5
+  service_count: 6

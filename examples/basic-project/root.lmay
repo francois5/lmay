@@ -1,0 +1,76 @@
+lmay_version: "1.0"
+
+project:
+  name: "my-basic-project"
+  version: "1.0.0"
+  description: "A simple project demonstrating basic LMAY usage"
+  languages: ["javascript"]
+  frameworks: ["express"]
+
+architecture:
+  pattern: "Layered"
+  entry_points:
+    - file: "app.js"
+      type: "server"
+    - file: "cli.js"
+      type: "main"
+
+structure:
+  src:
+    path: "src"
+    type: "directory"
+    description: "Main source code directory"
+    file_count: 4
+    primary_language: "javascript"
+
+  static:
+    path: "static"
+    type: "directory"
+    description: "Static web assets (CSS, JS, images)"
+    file_count: 3
+    primary_language: "javascript"
+
+  templates:
+    path: "templates"
+    type: "directory"
+    description: "HTML templates for web interface"
+    file_count: 2
+    primary_language: "html"
+
+  tests:
+    path: "tests"
+    type: "directory"
+    description: "Unit and integration tests"
+    file_count: 3
+    primary_language: "javascript"
+
+  config:
+    path: "config"
+    type: "directory"
+    description: "Configuration files and settings"
+    file_count: 2
+
+dependencies:
+  external:
+    - name: "express"
+      version: "4.18.0"
+      type: "npm"
+    - name: "axios"
+      version: "1.6.0"
+      type: "npm"
+    - name: "jest"
+      version: "29.7.0"
+      type: "npm"
+
+interfaces:
+  - type: "REST"
+    description: "Main API endpoint"
+    endpoint: "http://localhost:3000/api"
+  - type: "CLI"
+    description: "Command line interface"
+
+metadata:
+  generated_at: "2025-01-23T10:30:00Z"
+  total_files: 14
+  total_directories: 4
+  generator_version: "1.0.0"

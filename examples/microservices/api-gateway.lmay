@@ -1,0 +1,124 @@
+lmay_version: "1.0"
+
+module:
+  type: "api_gateway"
+  role: "Request routing, authentication, and rate limiting"
+  parent: "root.lmay"
+
+hierarchy:
+  depth: 1
+  parent: "../root.lmay"
+
+project:
+  name: "ecommerce-api-gateway"
+  description: "Central API gateway for microservices routing and security"
+  technology_stack: ["express", "nginx", "jwt", "redis"]
+
+structure:
+  src:
+    path: "api-gateway/src"
+    type: "directory"
+    description: "Gateway application source code"
+    file_count: 8
+    primary_language: "javascript"
+
+  middleware:
+    path: "api-gateway/middleware"
+    type: "directory"
+    description: "Custom middleware for authentication, logging, etc"
+    file_count: 5
+    primary_language: "javascript"
+
+  routes:
+    path: "api-gateway/routes"
+    type: "directory"
+    description: "Route definitions and service proxying"
+    file_count: 6
+    primary_language: "javascript"
+
+  config:
+    path: "api-gateway/config"
+    type: "directory"
+    description: "Gateway configuration and service discovery"
+    file_count: 3
+
+dependencies:
+  external:
+    - name: "express"
+      version: "4.18.2"
+      type: "npm"
+    - name: "http-proxy-middleware"
+      version: "2.0.6"
+      type: "npm"
+    - name: "jsonwebtoken"
+      version: "9.0.2"
+      type: "npm"
+    - name: "express-rate-limit"
+      version: "6.10.0"
+      type: "npm"
+    - name: "helmet"
+      version: "7.0.0"
+      type: "npm"
+    - name: "cors"
+      version: "2.8.5"
+      type: "npm"
+
+interfaces:
+  - type: "REST"
+    description: "External API endpoint"
+    endpoint: "https://api.ecommerce.com"
+  - type: "REST"
+    description: "Health check endpoint"
+    endpoint: "/health"
+  - type: "REST"
+    description: "Authentication endpoints"
+    endpoint: "/auth/*"
+  - type: "REST"
+    description: "User service proxy"
+    endpoint: "/api/users/*"
+  - type: "REST"
+    description: "Product service proxy"
+    endpoint: "/api/products/*"
+  - type: "REST"
+    description: "Order service proxy"
+    endpoint: "/api/orders/*"
+  - type: "REST"
+    description: "Payment service proxy"
+    endpoint: "/api/payments/*"
+
+routing_rules:
+  - path: "/api/users/*"
+    target: "http://user-service:3001"
+    auth_required: true
+    rate_limit: "100/hour"
+  - path: "/api/products/*"
+    target: "http://product-service:8000"
+    auth_required: false
+    rate_limit: "1000/hour"
+  - path: "/api/orders/*"
+    target: "http://order-service:8080"
+    auth_required: true
+    rate_limit: "50/hour"
+  - path: "/api/payments/*"
+    target: "http://payment-service:3002"
+    auth_required: true
+    rate_limit: "20/hour"
+
+security:
+  authentication: "JWT"
+  rate_limiting: true
+  cors_enabled: true
+  helmet_protection: true
+  request_logging: true
+
+load_balancing:
+  algorithm: "round_robin"
+  health_checks: true
+  circuit_breaker: true
+  timeout: 30000
+
+metadata:
+  port: 3000
+  environment: "production"
+  ssl_enabled: true
+  monitoring_enabled: true

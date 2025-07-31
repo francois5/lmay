@@ -1,0 +1,182 @@
+lmay_version: "1.0"
+
+project:
+  name: "ecommerce-microservices"
+  version: "3.2.1"
+  description: "Distributed e-commerce platform built with microservices architecture"
+  languages: ["javascript", "typescript", "python", "go"]
+  frameworks: ["express", "fastapi", "gin", "docker", "kubernetes"]
+
+architecture:
+  pattern: "Microservices"
+  entry_points:
+    - file: "api-gateway/index.js"
+      type: "server"
+    - file: "docker-compose.yml"
+      type: "main"
+    - file: "kubernetes/deploy.yaml"
+      type: "main"
+
+structure:
+  api-gateway:
+    path: "api-gateway"
+    type: "directory"
+    description: "API Gateway service for request routing and authentication"
+    file_count: 15
+    primary_language: "javascript"
+    lmay_file: "api-gateway.lmay"
+
+  user-service:
+    path: "services/user-service"
+    type: "directory"
+    description: "User management and authentication microservice"
+    file_count: 18
+    primary_language: "javascript"
+    lmay_file: "user-service.lmay"
+
+  product-service:
+    path: "services/product-service"
+    type: "directory"
+    description: "Product catalog and inventory management service"
+    file_count: 22
+    primary_language: "python"
+    lmay_file: "product-service.lmay"
+
+  order-service:
+    path: "services/order-service"
+    type: "directory"
+    description: "Order processing and management service"
+    file_count: 20
+    primary_language: "go"
+    lmay_file: "order-service.lmay"
+
+  payment-service:
+    path: "services/payment-service"
+    type: "directory"
+    description: "Payment processing and transaction management"
+    file_count: 16
+    primary_language: "javascript"
+    lmay_file: "payment-service.lmay"
+
+  notification-service:
+    path: "services/notification-service"
+    type: "directory"
+    description: "Email, SMS and push notification service"
+    file_count: 12
+    primary_language: "python"
+    lmay_file: "notification-service.lmay"
+
+  shared-libs:
+    path: "shared"
+    type: "directory"
+    description: "Shared libraries, utilities and common code"
+    file_count: 25
+    primary_language: "javascript"
+
+  infrastructure:
+    path: "infrastructure"
+    type: "directory"
+    description: "Infrastructure as code, monitoring and deployment configs"
+    file_count: 30
+
+  kubernetes:
+    path: "kubernetes"
+    type: "directory"
+    description: "Kubernetes deployment manifests and configurations"
+    file_count: 18
+
+dependencies:
+  external:
+    - name: "express"
+      version: "4.18.2"
+      type: "npm"
+    - name: "fastapi"
+      version: "0.104.1"
+      type: "pip"
+    - name: "gin"
+      version: "1.9.1"
+      type: "go"
+    - name: "redis"
+      version: "7.2.0"
+      type: "docker"
+    - name: "mongodb"
+      version: "7.0.0"
+      type: "docker"
+    - name: "postgresql"
+      version: "15.4"
+      type: "docker"
+    - name: "rabbitmq"
+      version: "3.12.0"
+      type: "docker"
+    - name: "elasticsearch"
+      version: "8.10.0"
+      type: "docker"
+  internal:
+    - name: "shared-auth"
+      path: "./shared/auth"
+    - name: "shared-logger"
+      path: "./shared/logger"
+    - name: "shared-metrics"
+      path: "./shared/metrics"
+    - name: "shared-events"
+      path: "./shared/events"
+
+interfaces:
+  - type: "REST"
+    description: "API Gateway external interface"
+    endpoint: "https://api.ecommerce.com"
+  - type: "REST"
+    description: "User service internal API"
+    endpoint: "http://user-service:3001"
+  - type: "REST"
+    description: "Product service internal API"
+    endpoint: "http://product-service:8000"
+  - type: "REST"
+    description: "Order service internal API"
+    endpoint: "http://order-service:8080"
+  - type: "REST"
+    description: "Payment service internal API"
+    endpoint: "http://payment-service:3002"
+  - type: "REST"
+    description: "Notification service internal API"
+    endpoint: "http://notification-service:8001"
+  - type: "Database"
+    description: "User service MongoDB"
+    endpoint: "mongodb://user-db:27017/users"
+  - type: "Database"
+    description: "Product service PostgreSQL"
+    endpoint: "postgres://product-db:5432/products"
+  - type: "Database"
+    description: "Order service PostgreSQL"
+    endpoint: "postgres://order-db:5432/orders"
+  - type: "Database"
+    description: "Shared Redis cache"
+    endpoint: "redis://redis:6379"
+  - type: "MessageQueue"
+    description: "Event bus for inter-service communication"
+    endpoint: "amqp://rabbitmq:5672"
+
+service_mesh:
+  enabled: true
+  technology: "istio"
+  features: ["traffic_management", "security", "observability"]
+
+monitoring:
+  metrics: "prometheus"
+  logging: "elasticsearch"
+  tracing: "jaeger"
+  alerting: "alertmanager"
+
+deployment:
+  orchestration: "kubernetes"
+  ci_cd: "github_actions"
+  environments: ["development", "staging", "production"]
+  scaling: "horizontal_pod_autoscaler"
+
+metadata:
+  generated_at: "2025-01-23T16:30:00Z"
+  total_files: 176
+  total_directories: 9
+  generator_version: "1.0.0"
+  service_count: 6
+  deployment_ready: true

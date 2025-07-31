@@ -1,0 +1,234 @@
+lmay_version: "1.0"
+
+module:
+  type: "microservice"
+  role: "Order processing, workflow management and fulfillment"
+  parent: "root.lmay"
+
+hierarchy:
+  depth: 1
+  parent: "../../root.lmay"
+
+project:
+  name: "order-service"
+  description: "Microservice handling order lifecycle, payment coordination, and fulfillment"
+  technology_stack: ["gin", "postgresql", "gorm", "redis", "temporal"]
+
+structure:
+  cmd:
+    path: "services/order-service/cmd"
+    type: "directory"
+    description: "Application entry points"
+    file_count: 2
+    primary_language: "go"
+
+  internal:
+    path: "services/order-service/internal"
+    type: "directory"
+    description: "Internal application code"
+    file_count: 20
+    primary_language: "go"
+
+  handlers:
+    path: "services/order-service/internal/handlers"
+    type: "directory"
+    description: "HTTP request handlers"
+    file_count: 5
+    primary_language: "go"
+
+  models:
+    path: "services/order-service/internal/models"
+    type: "directory"
+    description: "Domain models and entities"
+    file_count: 4
+    primary_language: "go"
+
+  services:
+    path: "services/order-service/internal/services"
+    type: "directory"
+    description: "Business logic and workflows"
+    file_count: 6
+    primary_language: "go"
+
+  workflows:
+    path: "services/order-service/internal/workflows"
+    type: "directory"
+    description: "Temporal workflow definitions"
+    file_count: 4
+    primary_language: "go"
+
+dependencies:
+  external:
+    - name: "gin-gonic/gin"
+      version: "1.9.1"
+      type: "go"
+    - name: "gorm.io/gorm"
+      version: "1.25.5"
+      type: "go"
+    - name: "gorm.io/driver/postgres"
+      version: "1.5.4"
+      type: "go"
+    - name: "go-redis/redis/v9"
+      version: "9.3.0"
+      type: "go"
+    - name: "go.temporal.io/sdk"
+      version: "1.25.1"
+      type: "go"
+  internal:
+    - name: "shared-logger"
+      path: "../../shared/logger"
+    - name: "shared-metrics"
+      path: "../../shared/metrics"
+    - name: "shared-events"
+      path: "../../shared/events"
+
+interfaces:
+  - type: "REST"
+    description: "Order management API"
+    endpoint: "http://order-service:8080"
+  - type: "Database"
+    description: "PostgreSQL order database"
+    endpoint: "postgres://order-db:5432/orders"
+  - type: "Database"
+    description: "Redis cache for order status"
+    endpoint: "redis://redis:6379/2"
+  - type: "MessageQueue"
+    description: "Order events and saga coordination"
+    endpoint: "amqp://rabbitmq:5672/order-events"
+  - type: "REST"
+    description: "Payment service integration"
+    endpoint: "http://payment-service:3002"
+  - type: "REST"
+    description: "Product service integration"
+    endpoint: "http://product-service:8000"
+  - type: "REST"
+    description: "Notification service integration"
+    endpoint: "http://notification-service:8001"
+
+api_endpoints:
+  - path: "/orders"
+    method: "POST"
+    description: "Create new order"
+    authentication: true
+  - path: "/orders/{order_id}"
+    method: "GET"
+    description: "Get order details"
+    authentication: true
+  - path: "/orders"
+    method: "GET"
+    description: "List user orders"
+    authentication: true
+  - path: "/orders/{order_id}/cancel"
+    method: "POST"
+    description: "Cancel order"
+    authentication: true
+  - path: "/orders/{order_id}/status"
+    method: "GET"
+    description: "Get order status"
+    authentication: true
+  - path: "/orders/{order_id}/items"
+    method: "GET"
+    description: "Get order items"
+    authentication: true
+
+events:
+  publishes:
+    - name: "order.created"
+      description: "Published when new order is placed"
+      schema: "OrderCreatedEvent"
+    - name: "order.confirmed"
+      description: "Published when order payment is confirmed"
+      schema: "OrderConfirmedEvent"
+    - name: "order.shipped"
+      description: "Published when order is shipped"
+      schema: "OrderShippedEvent"
+    - name: "order.delivered"
+      description: "Published when order is delivered"
+      schema: "OrderDeliveredEvent"
+    - name: "order.cancelled"
+      description: "Published when order is cancelled"
+      schema: "OrderCancelledEvent"
+  subscribes:
+    - name: "payment.completed"
+      description: "Confirms order when payment succeeds"
+      schema: "PaymentCompletedEvent"
+    - name: "payment.failed"
+      description: "Cancels order when payment fails"
+      schema: "PaymentFailedEvent"
+    - name: "inventory.reserved"
+      description: "Proceeds with order when inventory is reserved"
+      schema: "InventoryReservedEvent"
+
+order_workflow:
+  states:
+    - "pending"
+    - "payment_processing"
+    - "confirmed"
+    - "preparing"
+    - "shipped"
+    - "delivered"
+    - "cancelled"
+    - "refunded"
+  transitions:
+    - from: "pending"
+      to: "payment_processing"
+      trigger: "payment_initiated"
+    - from: "payment_processing"
+      to: "confirmed"
+      trigger: "payment_completed"
+    - from: "confirmed"
+      to: "preparing"
+      trigger: "inventory_reserved"
+    - from: "preparing"
+      to: "shipped"
+      trigger: "shipping_initiated"
+    - from: "shipped"
+      to: "delivered"
+      trigger: "delivery_confirmed"
+
+database_schema:
+  tables:
+    - name: "orders"
+      description: "Order header information"
+      indexes: ["user_id", "status", "created_at"]
+    - name: "order_items"
+      description: "Individual items in orders"
+      indexes: ["order_id", "product_id"]
+    - name: "order_status_history"
+      description: "Order status change tracking"
+      indexes: ["order_id", "created_at"]
+    - name: "shipping_addresses"
+      description: "Order delivery addresses"
+      indexes: ["order_id"]
+
+saga_patterns:
+  - name: "order_processing_saga"
+    description: "Coordinates order processing across services"
+    steps:
+      - "reserve_inventory"
+      - "process_payment"
+      - "confirm_order"
+      - "send_confirmation"
+    compensations:
+      - "release_inventory"
+      - "refund_payment"
+      - "cancel_order"
+
+health_checks:
+  - name: "database"
+    endpoint: "/health/db"
+    description: "PostgreSQL connection status"
+  - name: "redis"
+    endpoint: "/health/cache"
+    description: "Redis cache availability"
+  - name: "temporal"
+    endpoint: "/health/workflow"
+    description: "Temporal workflow engine status"
+
+metadata:
+  port: 8080
+  database: "postgresql"
+  cache: "redis"
+  workflow_engine: "temporal"
+  message_queue: "rabbitmq"
+  saga_coordination: true

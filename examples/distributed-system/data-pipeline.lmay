@@ -1,0 +1,321 @@
+lmay_version: "1.0"
+
+module:
+  type: "distributed_analytics"
+  role: "Global data ingestion, processing, and machine learning pipeline"
+  parent: "root.lmay"
+
+hierarchy:
+  depth: 1
+  parent: "../root.lmay"
+
+project:
+  name: "global-data-analytics-pipeline"
+  description: "Distributed data pipeline processing 10TB/day with real-time analytics and ML"
+  technology_stack: ["python", "kafka", "spark", "tensorflow", "clickhouse", "airflow"]
+
+data_flow_architecture:
+  ingestion_layer:
+    - source: "edge_logs"
+      volume: "5TB/day"
+      format: "structured_json"
+      stream: "kafka_edge_events"
+    - source: "application_metrics"
+      volume: "2TB/day" 
+      format: "prometheus_metrics"
+      stream: "kafka_metrics"
+    - source: "user_interactions"
+      volume: "3TB/day"
+      format: "event_stream"
+      stream: "kafka_user_events"
+  processing_layer:
+    - engine: "apache_spark"
+      mode: "stream_processing"
+      latency: "< 1s"
+      throughput: "100k_events/s"
+    - engine: "apache_flink"
+      mode: "complex_event_processing"
+      latency: "< 100ms"
+      throughput: "50k_events/s"
+  storage_layer:
+    - system: "clickhouse"
+      purpose: "real_time_analytics"
+      retention: "90_days"
+      compression: "lz4"
+    - system: "hdfs"
+      purpose: "data_lake"
+      retention: "7_years"
+      compression: "snappy"
+
+structure:
+  ingestion:
+    path: "data-pipeline/ingestion"
+    type: "directory"
+    description: "Data ingestion from multiple sources with schema validation"
+    file_count: 15
+    primary_language: "python"
+    deployment: "kafka_connect"
+
+  processing:
+    path: "data-pipeline/processing"
+    type: "directory"
+    description: "Stream and batch processing engines"
+    file_count: 22
+    primary_language: "python"
+    deployment: "spark_cluster"
+
+  analytics:
+    path: "data-pipeline/analytics"
+    type: "directory"
+    description: "Real-time analytics and reporting engine"
+    file_count: 18
+    primary_language: "python"
+    deployment: "kubernetes_jobs"
+
+  ml:
+    path: "data-pipeline/ml"
+    type: "directory"
+    description: "Machine learning models and training pipelines"
+    file_count: 25
+    primary_language: "python"
+    deployment: "kubeflow"
+
+dependencies:
+  external:
+    - name: "apache-kafka"
+      version: "3.6.0"
+      type: "docker"
+      purpose: "event_streaming"
+    - name: "apache-spark"
+      version: "3.5.0"
+      type: "docker"
+      purpose: "distributed_processing"
+    - name: "clickhouse"
+      version: "23.10"
+      type: "docker"
+      purpose: "analytics_database"
+    - name: "tensorflow"
+      version: "2.14.0"
+      type: "pip"
+      purpose: "machine_learning"
+    - name: "apache-airflow"
+      version: "2.7.0"
+      type: "docker"
+      purpose: "workflow_orchestration"
+
+interfaces:
+  - type: "Kafka"
+    description: "Event streaming platform"
+    endpoint: "kafka://kafka-cluster.data:9092"
+    topics: ["edge-events", "metrics", "user-events", "ml-predictions"]
+  - type: "REST"
+    description: "Analytics API"
+    endpoint: "https://analytics.globalcdn.com/api/v1"
+    features: ["real_time_queries", "historical_analysis", "custom_dashboards"]
+  - type: "gRPC"
+    description: "ML inference service"
+    endpoint: "grpc://ml-inference.data:8080"
+    models: ["content_recommendation", "anomaly_detection", "load_prediction"]
+  - type: "Database"
+    description: "ClickHouse analytics database"
+    endpoint: "clickhouse://analytics-cluster.data:8123"
+    features: ["columnar_storage", "real_time_aggregation", "sql_interface"]
+
+real_time_processing:
+  stream_processors:
+    - name: "edge_analytics"
+      framework: "apache_flink"
+      purpose: "real_time_cdn_metrics"
+      latency: "< 50ms"
+      throughput: "200k_events/s"
+    - name: "user_behavior"
+      framework: "kafka_streams"
+      purpose: "user_session_analysis"
+      latency: "< 100ms"
+      throughput: "100k_events/s"
+    - name: "anomaly_detection"
+      framework: "apache_storm"
+      purpose: "security_monitoring"
+      latency: "< 10ms"
+      throughput: "500k_events/s"
+
+batch_processing:
+  jobs:
+    - name: "daily_aggregation"
+      schedule: "0 2 * * *"
+      duration: "~2h"
+      resources: "100_cores_400gb_ram"
+      output: "daily_reports"
+    - name: "ml_model_training"
+      schedule: "0 0 * * 0"
+      duration: "~8h"
+      resources: "200_cores_1tb_ram_8gpu"
+      output: "updated_models"
+    - name: "data_archival"
+      schedule: "0 4 * * *"
+      duration: "~1h"
+      resources: "20_cores_80gb_ram"
+      output: "compressed_archives"
+
+machine_learning_pipeline:
+  feature_engineering:
+    - source: "user_interactions"
+      features: ["session_duration", "page_views", "bounce_rate", "geographic_location"]
+    - source: "content_metrics"
+      features: ["popularity_score", "engagement_rate", "cache_hit_ratio", "load_time"]
+    - source: "system_metrics"
+      features: ["cpu_utilization", "memory_usage", "network_throughput", "error_rate"]
+  
+  models:
+    - name: "content_recommendation"
+      algorithm: "collaborative_filtering"
+      training_frequency: "weekly"
+      accuracy: "92.5%"
+      inference_latency: "< 10ms"
+    - name: "load_prediction"
+      algorithm: "lstm_neural_network"
+      training_frequency: "daily"
+      accuracy: "89.2%"
+      prediction_horizon: "1_hour"
+    - name: "anomaly_detection"
+      algorithm: "isolation_forest"
+      training_frequency: "hourly"
+      false_positive_rate: "< 0.1%"
+      detection_latency: "< 5s"
+
+data_quality_management:
+  validation_rules:
+    - field: "timestamp"
+      rule: "not_null_and_recent"
+      action: "reject"
+    - field: "user_id"
+      rule: "valid_uuid_format"
+      action: "sanitize"
+    - field: "response_time"
+      rule: "positive_number_within_bounds"
+      action: "cap_outliers"
+  monitoring:
+    - metric: "data_completeness"
+      threshold: "> 99.9%"
+      alert: "critical"
+    - metric: "schema_compliance"
+      threshold: "> 99.5%"
+      alert: "warning"
+    - metric: "processing_lag"
+      threshold: "< 30s"
+      alert: "critical"
+
+geographic_data_distribution:
+  regions:
+    - name: "us_east"
+      kafka_cluster: "kafka-us-east.data:9092"
+      spark_cluster: "spark-us-east.data:7077"
+      storage: "hdfs://hdfs-us-east.data:9000"
+      processing_capacity: "40%"
+    - name: "eu_west"
+      kafka_cluster: "kafka-eu-west.data:9092"
+      spark_cluster: "spark-eu-west.data:7077"
+      storage: "hdfs://hdfs-eu-west.data:9000"
+      processing_capacity: "35%"
+    - name: "ap_southeast"
+      kafka_cluster: "kafka-ap-se.data:9092"
+      spark_cluster: "spark-ap-se.data:7077"
+      storage: "hdfs://hdfs-ap-se.data:9000"
+      processing_capacity: "25%"
+
+analytics_capabilities:
+  real_time_dashboards:
+    - name: "global_cdn_performance"
+      metrics: ["response_time", "cache_hit_ratio", "bandwidth_usage", "error_rate"]
+      update_frequency: "1s"
+    - name: "user_behavior_analytics"
+      metrics: ["active_users", "session_duration", "page_views", "conversion_rate"]
+      update_frequency: "5s"
+    - name: "infrastructure_monitoring"
+      metrics: ["cpu_usage", "memory_usage", "disk_io", "network_throughput"]
+      update_frequency: "10s"
+  
+  historical_analysis:
+    - name: "performance_trends"
+      time_range: "90_days"
+      granularity: "hourly"
+      features: ["trend_analysis", "seasonality_detection", "anomaly_highlighting"]
+    - name: "capacity_planning"
+      time_range: "365_days"
+      granularity: "daily"
+      features: ["growth_projections", "resource_forecasting", "cost_optimization"]
+
+data_governance:
+  privacy_compliance:
+    - regulation: "gdpr"
+      implementation: "data_anonymization"
+      retention_policy: "30_days_raw_7_years_aggregated"
+    - regulation: "ccpa"
+      implementation: "user_consent_tracking"
+      deletion_capability: "automated_upon_request"
+  access_control:
+    - role: "data_scientist"
+      permissions: ["read_all", "create_analysis", "deploy_models"]
+    - role: "analyst"
+      permissions: ["read_aggregated", "create_dashboards"]
+    - role: "engineer"
+      permissions: ["read_metrics", "manage_pipelines"]
+
+performance_monitoring:
+  processing_metrics:
+    - name: "throughput"
+      current: "85k_events/s"
+      target: "100k_events/s"
+      trend: "stable"
+    - name: "latency_p99"
+      current: "1.2s"
+      target: "< 1s"
+      trend: "improving"
+    - name: "error_rate"
+      current: "0.05%"
+      target: "< 0.1%"
+      trend: "stable"
+  
+  resource_utilization:
+    - component: "kafka_brokers"
+      cpu: "65%"
+      memory: "70%"
+      disk: "45%"
+    - component: "spark_executors"
+      cpu: "80%"
+      memory: "75%"
+      disk: "30%"
+    - component: "clickhouse_nodes"
+      cpu: "55%"
+      memory: "85%"
+      disk: "60%"
+
+disaster_recovery:
+  backup_strategy:
+    - data_tier: "hot"
+      backup_frequency: "continuous"
+      retention: "30_days"
+      recovery_time: "< 5m"
+    - data_tier: "warm"
+      backup_frequency: "hourly"
+      retention: "90_days"
+      recovery_time: "< 30m"
+    - data_tier: "cold"
+      backup_frequency: "daily"
+      retention: "7_years"
+      recovery_time: "< 4h"
+  
+  cross_region_replication:
+    primary_region: "us_east"
+    replica_regions: ["eu_west", "ap_southeast"]
+    replication_lag: "< 1m"
+    failover_automation: true
+
+metadata:
+  daily_data_volume: "10TB"
+  total_storage: "500TB"
+  processing_nodes: 150
+  ml_models_deployed: 12
+  real_time_streams: 25
+  batch_jobs: 45
+  data_retention_compliance: "multi_jurisdiction"

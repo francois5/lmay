@@ -1,0 +1,222 @@
+lmay_version: "1.0"
+
+project:
+  name: "global-cdn-platform"
+  version: "4.2.1"
+  description: "Global Content Delivery Network with edge computing, multi-cloud deployment, and distributed analytics"
+  languages: ["javascript", "python", "go", "rust", "bash"]
+  frameworks: ["kubernetes", "terraform", "ansible", "prometheus", "istio"]
+
+architecture:
+  pattern: "Distributed"
+  deployment_model: "multi_cloud"
+  geographic_distribution: "global"
+  entry_points:
+    - file: "infrastructure/terraform/main.tf"
+      type: "main"
+    - file: "orchestration/k8s-deploy.yaml"
+      type: "main"
+    - file: "monitoring/bootstrap.sh"
+      type: "main"
+
+topology:
+  regions:
+    - name: "us-east-1"
+      cloud_provider: "aws"
+      primary: true
+      edge_locations: 12
+    - name: "eu-west-1"
+      cloud_provider: "aws"
+      primary: false
+      edge_locations: 8
+    - name: "ap-southeast-1"
+      cloud_provider: "gcp"
+      primary: false
+      edge_locations: 6
+    - name: "us-central1"
+      cloud_provider: "gcp"
+      primary: false
+      edge_locations: 4
+
+structure:
+  core-services:
+    path: "core-services"
+    type: "directory"
+    description: "Core platform services deployed across all regions"
+    file_count: 45
+    primary_language: "go"
+    lmay_file: "core-services.lmay"
+
+  edge-compute:
+    path: "edge-compute"
+    type: "directory"
+    description: "Edge computing nodes and CDN logic"
+    file_count: 32
+    primary_language: "rust"
+    lmay_file: "edge-compute.lmay"
+
+  data-pipeline:
+    path: "data-pipeline"
+    type: "directory"
+    description: "Distributed data processing and analytics pipeline"
+    file_count: 28
+    primary_language: "python"
+    lmay_file: "data-pipeline.lmay"
+
+  control-plane:
+    path: "control-plane"
+    type: "directory"
+    description: "Centralized control and management plane"
+    file_count: 38
+    primary_language: "javascript"
+    lmay_file: "control-plane.lmay"
+
+  infrastructure:
+    path: "infrastructure"
+    type: "directory"
+    description: "Infrastructure as Code across multiple cloud providers"
+    file_count: 52
+    primary_language: "terraform"
+
+  monitoring:
+    path: "monitoring"
+    type: "directory"
+    description: "Global monitoring, alerting, and observability stack"
+    file_count: 35
+    primary_language: "yaml"
+
+  orchestration:
+    path: "orchestration"
+    type: "directory"
+    description: "Kubernetes manifests and deployment automation"
+    file_count: 41
+    primary_language: "yaml"
+
+  edge-configs:
+    path: "edge-configs"
+    type: "directory"
+    description: "Configuration management for edge locations"
+    file_count: 18
+
+dependencies:
+  external:
+    - name: "kubernetes"
+      version: "1.28.0"
+      type: "platform"
+    - name: "istio"
+      version: "1.19.0"
+      type: "platform"
+    - name: "prometheus"
+      version: "2.47.0"
+      type: "docker"
+    - name: "grafana"
+      version: "10.1.0"
+      type: "docker"
+    - name: "envoy"
+      version: "1.27.0"
+      type: "docker"
+    - name: "consul"
+      version: "1.16.0"
+      type: "docker"
+    - name: "vault"
+      version: "1.14.0"
+      type: "docker"
+  cloud_services:
+    - name: "AWS CloudFront"
+      service: "cdn"
+      regions: ["us-east-1", "eu-west-1"]
+    - name: "Google Cloud CDN"
+      service: "cdn"
+      regions: ["ap-southeast-1", "us-central1"]
+    - name: "AWS Route 53"
+      service: "dns"
+      global: true
+    - name: "GCP Cloud DNS"
+      service: "dns"
+      global: true
+
+interfaces:
+  - type: "REST"
+    description: "Global API endpoint with geographic load balancing"
+    endpoint: "https://api.globalcdn.com"
+  - type: "REST"
+    description: "Regional API endpoints"
+    endpoints:
+      - "https://us-east-1.api.globalcdn.com"
+      - "https://eu-west-1.api.globalcdn.com"
+      - "https://ap-southeast-1.api.globalcdn.com"
+  - type: "gRPC"
+    description: "Inter-service communication across regions"
+    endpoint: "grpc://internal.globalcdn.com:443"
+  - type: "MessageQueue"
+    description: "Global event streaming with Kafka"
+    endpoint: "kafka://global-kafka-cluster:9092"
+  - type: "Database"
+    description: "Globally distributed database cluster"
+    endpoints:
+      - "mongodb://us-east-primary.db.globalcdn.com:27017"
+      - "mongodb://eu-west-replica.db.globalcdn.com:27017"
+      - "mongodb://ap-southeast-replica.db.globalcdn.com:27017"
+  - type: "Cache"
+    description: "Global Redis cache with geographic replication"
+    endpoints:
+      - "redis://us-east-cache.globalcdn.com:6379"
+      - "redis://eu-west-cache.globalcdn.com:6379"
+      - "redis://ap-southeast-cache.globalcdn.com:6379"
+
+network_topology:
+  backbone: "dedicated_fiber"
+  interconnects:
+    - type: "aws_direct_connect"
+      regions: ["us-east-1", "eu-west-1"]
+      bandwidth: "10Gbps"
+    - type: "gcp_cloud_interconnect"
+      regions: ["ap-southeast-1", "us-central1"]
+      bandwidth: "10Gbps"
+    - type: "cross_cloud_vpn"
+      provider_a: "aws"
+      provider_b: "gcp"
+      bandwidth: "1Gbps"
+  edge_network:
+    protocol: "anycast"
+    routing: "bgp"
+    failover: "automatic"
+
+data_replication:
+  strategy: "multi_master"
+  consistency_model: "eventual_consistency"
+  conflict_resolution: "last_write_wins"
+  replication_lag: "< 100ms"
+  backup_strategy: "cross_region_snapshots"
+
+security:
+  encryption:
+    - "tls_1_3_in_transit"
+    - "aes_256_at_rest"
+  authentication: "mutual_tls"
+  authorization: "rbac_with_opa"
+  secrets_management: "hashicorp_vault"
+  compliance: ["soc2", "iso27001", "gdpr"]
+
+disaster_recovery:
+  rto: "5_minutes"
+  rpo: "30_seconds"
+  backup_regions: 2
+  failover_automation: true
+  testing_frequency: "monthly"
+
+performance_targets:
+  global_latency: "< 50ms"
+  availability: "99.99%"
+  throughput: "1_million_rps"
+  cache_hit_ratio: "> 95%"
+
+metadata:
+  generated_at: "2025-01-23T18:00:00Z"
+  total_files: 289
+  total_directories: 8
+  generator_version: "1.0.0"
+  deployment_regions: 4
+  edge_locations: 30
+  infrastructure_managed: true
+  multi_cloud_enabled: true

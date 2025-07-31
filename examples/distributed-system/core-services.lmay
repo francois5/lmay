@@ -1,0 +1,182 @@
+lmay_version: "1.0"
+
+module:
+  type: "distributed_core"
+  role: "Core platform services with global deployment and high availability"
+  parent: "root.lmay"
+
+hierarchy:
+  depth: 1
+  parent: "../root.lmay"
+
+project:
+  name: "global-cdn-core-services"
+  description: "Core services providing gateway, service discovery, configuration, and authentication across all regions"
+  technology_stack: ["go", "grpc", "consul", "vault", "etcd"]
+
+geographic_deployment:
+  primary_regions:
+    - region: "us-east-1"
+      cloud: "aws"
+      instances: 6
+      load_balancer: "aws_alb"
+    - region: "eu-west-1"
+      cloud: "aws"
+      instances: 4
+      load_balancer: "aws_alb"
+    - region: "ap-southeast-1"
+      cloud: "gcp"
+      instances: 4
+      load_balancer: "gcp_lb"
+  disaster_recovery:
+    - region: "us-west-2"
+      cloud: "aws"
+      instances: 2
+      status: "standby"
+
+structure:
+  gateway:
+    path: "core-services/gateway"
+    type: "directory"
+    description: "Global API gateway with geographic routing"
+    file_count: 12
+    primary_language: "go"
+    deployment_model: "active_active"
+
+  discovery:
+    path: "core-services/discovery"
+    type: "directory"
+    description: "Service discovery and health checking across regions"
+    file_count: 8
+    primary_language: "go"
+    deployment_model: "cluster_per_region"
+
+  config:
+    path: "core-services/config"
+    type: "directory"
+    description: "Distributed configuration management"
+    file_count: 10
+    primary_language: "go"
+    deployment_model: "replicated"
+
+  auth:
+    path: "core-services/auth"
+    type: "directory"
+    description: "Authentication and authorization service"
+    file_count: 15
+    primary_language: "go"
+    deployment_model: "active_active"
+
+dependencies:
+  external:
+    - name: "consul"
+      version: "1.16.0"
+      type: "docker"
+      purpose: "service_discovery"
+    - name: "vault"
+      version: "1.14.0"
+      type: "docker"
+      purpose: "secrets_management"
+    - name: "etcd"
+      version: "3.5.9"
+      type: "docker"
+      purpose: "distributed_storage"
+    - name: "envoy"
+      version: "1.27.0"
+      type: "docker"
+      purpose: "load_balancing"
+
+interfaces:
+  - type: "gRPC"
+    description: "Gateway service internal API"
+    endpoint: "grpc://gateway.core:8080"
+    methods: ["Route", "Authenticate", "RateLimit"]
+  - type: "gRPC"
+    description: "Service discovery API"
+    endpoint: "grpc://discovery.core:8081"
+    methods: ["Register", "Discover", "HealthCheck"]
+  - type: "gRPC"
+    description: "Configuration service API"
+    endpoint: "grpc://config.core:8082"
+    methods: ["GetConfig", "UpdateConfig", "Subscribe"]
+  - type: "gRPC"
+    description: "Authentication service API"
+    endpoint: "grpc://auth.core:8083"
+    methods: ["Authenticate", "Authorize", "RefreshToken"]
+  - type: "REST"
+    description: "External API gateway endpoint"
+    endpoint: "https://api.globalcdn.com"
+    features: ["geographic_routing", "load_balancing", "ssl_termination"]
+
+service_mesh:
+  enabled: true
+  technology: "istio"
+  features:
+    - "mutual_tls"
+    - "traffic_management"
+    - "observability"
+    - "security_policies"
+  sidecar_injection: "automatic"
+
+load_balancing:
+  algorithm: "consistent_hashing"
+  health_checks: true
+  circuit_breaker: true
+  retry_policy:
+    max_attempts: 3
+    timeout: "5s"
+    backoff: "exponential"
+
+high_availability:
+  replication_factor: 3
+  leader_election: "raft"
+  data_synchronization: "eventual_consistency"
+  failover_time: "< 30s"
+  cross_region_backup: true
+
+monitoring:
+  metrics:
+    - "request_latency"
+    - "throughput_rps"
+    - "error_rate"
+    - "cpu_utilization"
+    - "memory_usage"
+  distributed_tracing: "jaeger"
+  log_aggregation: "elasticsearch"
+  alerting: "prometheus_alertmanager"
+
+security:
+  authentication: "jwt_with_refresh"
+  authorization: "rbac"
+  encryption_at_rest: "aes_256"
+  encryption_in_transit: "tls_1_3"
+  secret_rotation: "automatic"
+  audit_logging: "enabled"
+
+data_consistency:
+  model: "eventual_consistency"
+  synchronization: "raft_consensus"
+  conflict_resolution: "vector_clocks"
+  partition_tolerance: "cap_theorem_ap"
+
+performance_requirements:
+  gateway_latency: "< 10ms"
+  discovery_latency: "< 5ms"
+  config_sync_time: "< 1s"
+  auth_response_time: "< 50ms"
+  availability_target: "99.99%"
+
+deployment_automation:
+  blue_green_deployment: true
+  canary_releases: true
+  rollback_capability: true
+  health_check_grace_period: "30s"
+  zero_downtime_updates: true
+
+metadata:
+  service_count: 4
+  total_instances: 14
+  regions_deployed: 3
+  disaster_recovery_regions: 1
+  average_response_time: "8ms"
+  current_availability: "99.995%"

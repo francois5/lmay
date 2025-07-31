@@ -1,0 +1,280 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - JWT_SECRET=dev-secret-key
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+      - user-service
+      - product-service
+      - order-service
+      - payment-service
+    networks:
+      - microservices
+
+  # User Service
+  user-service:
+    build: ./services/user-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://user-db:27017/users
+      - JWT_SECRET=dev-secret-key
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - user-db
+      - rabbitmq
+    networks:
+      - microservices
+
+  # Product Service
+  product-service:
+    build: ./services/product-service
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@product-db:5432/products
+      - REDIS_URL=redis://redis:6379/1
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - product-db
+      - redis
+      - elasticsearch
+      - rabbitmq
+    networks:
+      - microservices
+
+  # Order Service
+  order-service:
+    build: ./services/order-service
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@order-db:5432/orders
+      - REDIS_URL=redis://redis:6379/2
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - TEMPORAL_HOST=temporal:7233
+    depends_on:
+      - order-db
+      - redis
+      - rabbitmq
+      - temporal
+    networks:
+      - microservices
+
+  # Payment Service
+  payment-service:
+    build: ./services/payment-service
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@payment-db:5432/payments
+      - STRIPE_SECRET_KEY=sk_test_stripe_key
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - payment-db
+      - rabbitmq
+    networks:
+      - microservices
+
+  # Notification Service
+  notification-service:
+    build: ./services/notification-service
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@notification-db:5432/notifications
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+    depends_on:
+      - notification-db
+      - rabbitmq
+    networks:
+      - microservices
+
+  # Databases
+  user-db:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - user_data:/data/db
+    networks:
+      - microservices
+
+  product-db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=products
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - product_data:/var/lib/postgresql/data
+    networks:
+      - microservices
+
+  order-db:
+    image: postgres:15
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=orders
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - order_data:/var/lib/postgresql/data
+    networks:
+      - microservices
+
+  payment-db:
+    image: postgres:15
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=payments
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - payment_data:/var/lib/postgresql/data
+    networks:
+      - microservices
+
+  notification-db:
+    image: postgres:15
+    ports:
+      - "5435:5432"
+    environment:
+      - POSTGRES_DB=notifications
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - notification_data:/var/lib/postgresql/data
+    networks:
+      - microservices
+
+  # Infrastructure Services
+  redis:
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - microservices
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - microservices
+
+  elasticsearch:
+    image: elasticsearch:8.10.0
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - microservices
+
+  # Temporal Workflow Engine
+  temporal:
+    image: temporalio/auto-setup:1.22.0
+    ports:
+      - "7233:7233"
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PWD=password
+      - POSTGRES_SEEDS=temporal-db
+    depends_on:
+      - temporal-db
+    networks:
+      - microservices
+
+  temporal-db:
+    image: postgres:15
+    ports:
+      - "5436:5432"
+    environment:
+      - POSTGRES_DB=temporal
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - temporal_data:/var/lib/postgresql/data
+    networks:
+      - microservices
+
+  # Monitoring
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - microservices
+
+  grafana:
+    image: grafana/grafana:10.1.0
+    ports:
+      - "3030:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - microservices
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.49
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - microservices
+
+volumes:
+  user_data:
+  product_data:
+  order_data:
+  payment_data:
+  notification_data:
+  redis_data:
+  rabbitmq_data:
+  elasticsearch_data:
+  temporal_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  microservices:
+    driver: bridge

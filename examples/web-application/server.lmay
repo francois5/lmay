@@ -1,0 +1,122 @@
+lmay_version: "1.0"
+
+module:
+  type: "backend"
+  role: "API server and business logic"
+  parent: "root.lmay"
+
+hierarchy:
+  depth: 1
+  parent: "../root.lmay"
+
+project:
+  name: "ecommerce-backend"
+  description: "Express.js API server with MongoDB integration"
+  technology_stack: ["express", "mongodb", "mongoose", "jwt"]
+
+structure:
+  controllers:
+    path: "server/controllers"
+    type: "directory"
+    description: "Request handlers and business logic"
+    file_count: 8
+    primary_language: "javascript"
+
+  models:
+    path: "server/models"
+    type: "directory"
+    description: "MongoDB schemas and data models"
+    file_count: 6
+    primary_language: "javascript"
+
+  middleware:
+    path: "server/middleware"
+    type: "directory"
+    description: "Express middleware functions"
+    file_count: 5
+    primary_language: "javascript"
+
+  routes:
+    path: "server/routes"
+    type: "directory"
+    description: "API route definitions"
+    file_count: 7
+    primary_language: "javascript"
+
+  utils:
+    path: "server/utils"
+    type: "directory"
+    description: "Helper functions and utilities"
+    file_count: 4
+    primary_language: "javascript"
+
+dependencies:
+  external:
+    - name: "express"
+      version: "4.18.2"
+      type: "npm"
+    - name: "mongoose"
+      version: "7.5.0"
+      type: "npm"
+    - name: "bcryptjs"
+      version: "2.4.3"
+      type: "npm"
+    - name: "jsonwebtoken"
+      version: "9.0.2"
+      type: "npm"
+    - name: "cors"
+      version: "2.8.5"
+      type: "npm"
+    - name: "helmet"
+      version: "7.0.0"
+      type: "npm"
+    - name: "express-rate-limit"
+      version: "6.10.0"
+      type: "npm"
+
+interfaces:
+  - type: "REST"
+    description: "User authentication endpoints"
+    endpoint: "/api/auth"
+  - type: "REST"
+    description: "Product management API"
+    endpoint: "/api/products"
+  - type: "REST"
+    description: "Order processing API"
+    endpoint: "/api/orders"
+  - type: "REST"
+    description: "User profile management"
+    endpoint: "/api/users"
+  - type: "Database"
+    description: "MongoDB connection"
+    endpoint: "mongodb://localhost:27017/ecommerce"
+
+security:
+  authentication: "JWT"
+  password_hashing: "bcrypt"
+  rate_limiting: true
+  cors_enabled: true
+  helmet_protection: true
+
+api_endpoints:
+  - path: "/api/auth/login"
+    method: "POST"
+    description: "User login"
+  - path: "/api/auth/register"
+    method: "POST"
+    description: "User registration"
+  - path: "/api/products"
+    method: "GET"
+    description: "Get all products"
+  - path: "/api/products/:id"
+    method: "GET"
+    description: "Get product by ID"
+  - path: "/api/orders"
+    method: "POST"
+    description: "Create new order"
+
+metadata:
+  controller_count: 8
+  model_count: 6
+  middleware_count: 5
+  route_count: 7

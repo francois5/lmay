@@ -1,0 +1,252 @@
+lmay_version: "1.0"
+
+module:
+  type: "edge_infrastructure"
+  role: "Edge computing nodes providing CDN, serverless compute, and distributed storage"
+  parent: "root.lmay"
+
+hierarchy:
+  depth: 1
+  parent: "../root.lmay"
+
+project:
+  name: "global-edge-compute-network"
+  description: "Distributed edge computing infrastructure with 30+ locations worldwide"
+  technology_stack: ["rust", "wasm", "kubernetes", "ceph", "redis"]
+
+edge_locations:
+  tier_1:
+    - city: "New York"
+      region: "us-east-1"
+      capacity: "high"
+      pop_count: 4
+      storage_tb: 500
+    - city: "London"
+      region: "eu-west-1"
+      capacity: "high"
+      pop_count: 3
+      storage_tb: 300
+    - city: "Tokyo"
+      region: "ap-northeast-1"
+      capacity: "high"
+      pop_count: 3
+      storage_tb: 300
+  tier_2:
+    - city: "Los Angeles"
+      region: "us-west-1"
+      capacity: "medium"
+      pop_count: 2
+      storage_tb: 200
+    - city: "Frankfurt"
+      region: "eu-central-1"
+      capacity: "medium"
+      pop_count: 2
+      storage_tb: 200
+    - city: "Singapore"
+      region: "ap-southeast-1"
+      capacity: "medium"
+      pop_count: 2
+      storage_tb: 200
+
+structure:
+  cdn:
+    path: "edge-compute/cdn"
+    type: "directory"
+    description: "Content delivery and caching layer"
+    file_count: 18
+    primary_language: "rust"
+    deployment_scope: "all_edges"
+
+  compute:
+    path: "edge-compute/compute"
+    type: "directory"
+    description: "Serverless edge computing runtime"
+    file_count: 12
+    primary_language: "rust"
+    deployment_scope: "tier_1_edges"
+
+  storage:
+    path: "edge-compute/storage"
+    type: "directory"
+    description: "Distributed object storage at the edge"
+    file_count: 8
+    primary_language: "rust"
+    deployment_scope: "all_edges"
+
+dependencies:
+  external:
+    - name: "tokio"
+      version: "1.34.0"
+      type: "rust_crate"
+      purpose: "async_runtime"
+    - name: "hyper"
+      version: "0.14.27"
+      type: "rust_crate"
+      purpose: "http_server"
+    - name: "wasmtime"
+      version: "13.0.0"
+      type: "rust_crate"
+      purpose: "wasm_runtime"
+    - name: "redis"
+      version: "0.23.3"
+      type: "rust_crate"
+      purpose: "caching"
+    - name: "serde"
+      version: "1.0.190"
+      type: "rust_crate"
+      purpose: "serialization"
+
+interfaces:
+  - type: "HTTP"
+    description: "CDN public endpoints"
+    endpoints:
+      - "https://cdn-nyc.globalcdn.com"
+      - "https://cdn-lon.globalcdn.com"
+      - "https://cdn-tok.globalcdn.com"
+    features: ["http2", "http3", "brotli_compression"]
+  - type: "WebSocket"
+    description: "Real-time edge computing"
+    endpoint: "wss://edge.globalcdn.com/compute"
+    protocols: ["json-rpc", "binary"]
+  - type: "gRPC"
+    description: "Inter-edge communication"
+    endpoint: "grpc://edge-mesh.internal:443"
+    encryption: "mutual_tls"
+
+cdn_capabilities:
+  cache_algorithms:
+    - "lru_with_ttl"
+    - "adaptive_replacement"
+    - "machine_learning_based"
+  content_types:
+    - "static_assets"
+    - "dynamic_content"
+    - "streaming_video"
+    - "api_responses"
+  optimization:
+    - "image_resizing"
+    - "webp_conversion"
+    - "minification"
+    - "compression"
+  cache_policies:
+    - name: "static_assets"
+      ttl: "7d"
+      purge_strategy: "tag_based"
+    - name: "api_responses"
+      ttl: "5m"
+      purge_strategy: "time_based"
+    - name: "streaming_content"
+      ttl: "24h"
+      purge_strategy: "manual"
+
+edge_compute_runtime:
+  execution_engine: "wasmtime"
+  supported_languages:
+    - "javascript"
+    - "typescript"
+    - "rust"
+    - "c++"
+    - "python"
+  resource_limits:
+    memory: "128MB"
+    cpu_time: "50ms"
+    wall_time: "10s"
+    network_requests: 100
+  cold_start_time: "< 5ms"
+  concurrent_executions: 1000
+
+distributed_storage:
+  architecture: "distributed_hash_table"
+  replication_factor: 3
+  consistency_model: "eventual_consistency"
+  data_durability: "99.999999999%"
+  storage_classes:
+    - name: "hot"
+      access_pattern: "frequent"
+      replication: 3
+      cost_multiplier: 1.0
+    - name: "warm"
+      access_pattern: "infrequent"
+      replication: 2
+      cost_multiplier: 0.5
+    - name: "cold"
+      access_pattern: "archival"
+      replication: 1
+      cost_multiplier: 0.1
+
+performance_optimization:
+  request_routing:
+    algorithm: "anycast_with_latency"
+    failover_time: "< 100ms"
+    load_balancing: "consistent_hashing"
+  caching_strategy:
+    l1_cache: "memory"
+    l2_cache: "nvme_ssd"
+    l3_cache: "distributed_network"
+  content_prefetching: "ml_based_prediction"
+  bandwidth_optimization: "adaptive_bitrate"
+
+monitoring_and_analytics:
+  real_time_metrics:
+    - "cache_hit_ratio"
+    - "origin_requests"
+    - "response_times"
+    - "bandwidth_utilization"
+    - "compute_utilization"
+  geographic_analytics:
+    - "traffic_patterns"
+    - "user_demographics"
+    - "content_popularity"
+    - "performance_by_region"
+  edge_health_monitoring:
+    - "node_availability"
+    - "storage_capacity"
+    - "network_connectivity"
+    - "compute_resources"
+
+security_features:
+  ddos_protection: "rate_limiting_with_ml"
+  waf_capabilities:
+    - "sql_injection_prevention"
+    - "xss_protection"
+    - "bot_detection"
+    - "ip_reputation"
+  ssl_termination: "edge_optimized"
+  certificate_management: "automated_acme"
+  content_encryption: "aes_256_gcm"
+
+edge_orchestration:
+  deployment_automation: "kubernetes_operators"
+  configuration_sync: "git_ops"
+  health_monitoring: "prometheus_federation"
+  log_aggregation: "distributed_elk"
+  alerting: "multi_region_alertmanager"
+
+network_architecture:
+  backbone_connectivity: "dedicated_fiber"
+  last_mile_optimization: "tcp_bbr"
+  protocol_support: ["http/1.1", "http/2", "http/3", "quic"]
+  ipv6_support: "dual_stack"
+  anycast_routing: "bgp_based"
+
+disaster_recovery:
+  data_replication: "cross_region"
+  failover_automation: "dns_based"
+  backup_strategy: "incremental_snapshots"
+  recovery_time_objective: "< 5m"
+  recovery_point_objective: "< 1m"
+
+cost_optimization:
+  auto_scaling: "demand_based"
+  resource_pooling: "multi_tenant"
+  power_management: "dynamic_frequency_scaling"
+  cooling_optimization: "liquid_cooling"
+  renewable_energy: "90%_coverage"
+
+metadata:
+  total_edge_locations: 30
+  total_storage_capacity: "10PB"
+  global_cache_hit_ratio: "96.5%"
+  average_response_time: "35ms"
+  monthly_requests: "500B"
+  power_usage_effectiveness: 1.15
