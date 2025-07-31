@@ -1,0 +1,70 @@
+{
+  "project": {
+    "name": "auto-detected",
+    "description": "Auto-generated LMAY documentation",
+    "languages": [],
+    "frameworks": []
+  },
+  "sources": {
+    "type": "local",
+    "local": {
+      "scanDepth": 5,
+      "excludePatterns": [
+        "node_modules",
+        ".git",
+        "dist",
+        "build",
+        "coverage",
+        ".cache",
+        "tmp",
+        "temp"
+      ],
+      "includeDotFiles": false
+    },
+    "remote": {
+      "enabled": false,
+      "servers": [],
+      "authentication": {
+        "method": "none",
+        "keyFile": null,
+        "username": null
+      },
+      "timeout": 30000,
+      "maxConcurrency": 5
+    },
+    "web": {
+      "enabled": false,
+      "sites": [],
+      "followRedirects": true,
+      "maxDepth": 3,
+      "respectRobotsTxt": true,
+      "userAgent": "LMAY-Generator/1.0",
+      "timeout": 10000
+    }
+  },
+  "analysis": {
+    "detectLanguages": true,
+    "detectFrameworks": true,
+    "detectServices": true,
+    "detectInfrastructure": true
+  },
+  "structure": {
+    "groupByType": true,
+    "createModuleFiles": true,
+    "maxItemsPerModule": 20,
+    "distributeByLocation": true
+  },
+  "output": {
+    "rootFile": "root.lmay",
+    "moduleExtension": ".lmay",
+    "indent": 2,
+    "cleanOutput": false
+  },
+  "lmay": {
+    "version": "1.0",
+    "maxDepth": 5,
+    "includeHidden": false,
+    "generateDescriptions": true,
+    "includeMetrics": true
+  }
+}

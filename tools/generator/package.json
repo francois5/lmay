@@ -1,0 +1,29 @@
+{
+  "name": "lmay-generator",
+  "version": "1.0.0",
+  "description": "Outil de génération automatique de fichiers LMAY à partir de l'analyse de systèmes de fichiers",
+  "main": "src/generator.js",
+  "bin": {
+    "lmay-generate": "src/cli.js"
+  },
+  "scripts": {
+    "generate": "node src/cli.js",
+    "test": "node tests/run.js"
+  },
+  "dependencies": {
+    "commander": "^11.0.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "assert": "^2.0.0"
+  },
+  "keywords": [
+    "lmay",
+    "filesystem-analysis",
+    "documentation",
+    "ai",
+    "language-agnostic"
+  ],
+  "author": "LMAY Project",
+  "license": "MPL-2.0"
+}

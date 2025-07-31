@@ -1,0 +1,190 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LMAY v1.0 Schema",
+  "description": "Schéma JSON pour valider les fichiers LMAY v1.0",
+  "type": "object",
+  "properties": {
+    "lmay_version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "Version de la spécification LMAY"
+    },
+    "project": {
+      "type": "object",
+      "required": ["name", "description"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+.*$"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "javascript", "typescript", "python", "java", "go", "rust", 
+              "cpp", "c", "csharp", "php", "ruby", "swift", "kotlin", 
+              "scala", "shell", "sql", "html", "css", "scss", "less"
+            ]
+          }
+        },
+        "frameworks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "architecture": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "enum": [
+            "MVC", "Component-based", "Service-oriented", "Layered", 
+            "Microservices", "Monolithic", "Event-driven", "Unstructured"
+          ]
+        },
+        "entry_points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["file"],
+            "properties": {
+              "file": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["server", "application", "main", "index", "entry"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "structure": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z0-9_-]+$": {
+          "type": "object",
+          "required": ["path", "type"],
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": ["directory", "file"]
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "file_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "primary_language": {
+              "type": ["string", "null"]
+            },
+            "lmay_file": {
+              "type": "string",
+              "pattern": "\\.lmay$"
+            }
+          }
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "external": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["npm", "pip", "maven", "cargo", "go", "gem", "composer"]
+              }
+            }
+          }
+        },
+        "internal": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "path"],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "description"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["REST", "GraphQL", "CLI", "WebSocket", "Database", "File"]
+          },
+          "description": {
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "total_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_directories": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "generator_version": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": ["lmay_version", "project", "structure"],
+  "additionalProperties": false
+}
